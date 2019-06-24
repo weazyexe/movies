@@ -3,6 +3,10 @@ package exe.weazy.movies.entity
 import com.google.gson.annotations.SerializedName
 
 class Movie (
+
+    @SerializedName("id")
+    var id : Int,
+
     @SerializedName("title")
     var title : String,
 
@@ -16,5 +20,7 @@ class Movie (
     var releaseDate : String,
 
     @SerializedName("adult")
-    var adult : Boolean
+    var adult : Boolean,
+
+    var like : Boolean
 )

@@ -40,11 +40,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onStart() {
         super.onStart()
 
-        adapter = MoviesAdapter(movies)
-        manager = LinearLayoutManager(this)
-
-        recycler_view_movies.adapter = adapter
-        recycler_view_movies.layoutManager = manager
+        initRecyclerView()
+        initListeners()
     }
 
     override fun showList(movies : ArrayList<Movie>) {
@@ -69,6 +66,28 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         layout_progress_bar.visibility = View.GONE
         layout_error.visibility = View.VISIBLE
         recycler_view_movies.visibility = View.GONE
+    }
+
+
+    private fun initRecyclerView() {
+        adapter = MoviesAdapter(movies)
+        manager = LinearLayoutManager(this)
+
+        recycler_view_movies.adapter = adapter
+        recycler_view_movies.layoutManager = manager
+    }
+
+    private fun initListeners() {
+        swipe_refresh_layout_movies.setOnRefreshListener {
+            page = 1
+            presenter.updateMovieList(page)
+            swipe_refresh_layout_movies.isRefreshing = false
+        }
+
+        fab_update.setOnClickListener {
+            page = 1
+            presenter.updateMovieList(page)
+        }
     }
 
 }

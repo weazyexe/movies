@@ -33,12 +33,16 @@ class MainPresenter : MainContract.Presenter, LoadingListener {
 
     override fun onFinished(movies: ArrayList<Movie>?) {
         if (movies != null) {
-            movies.forEach {
-                it.posterPath = BASE_IMAGE_URL + it.posterPath
-                this.movies.add(it)
+            movies.forEach { movie ->
+                movie.posterPath = BASE_IMAGE_URL + movie.posterPath
+
+                if (!this.movies.contains(movie))
+                    this.movies.add(movie)
             }
 
             view.showList(this.movies)
+        } else {
+            view.showError()
         }
     }
 

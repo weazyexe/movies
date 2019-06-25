@@ -23,4 +23,17 @@ class Movie (
     var adult : Boolean,
 
     var like : Boolean
-)
+) {
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Movie) return false
+
+        return id == other.id && title == other.title && overview == other.overview &&
+                posterPath == other.posterPath && releaseDate == other.releaseDate &&
+                adult == other.adult
+    }
+
+    override fun toString(): String {
+        return "$id | $title"
+    }
+}

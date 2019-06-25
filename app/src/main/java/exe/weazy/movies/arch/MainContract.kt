@@ -11,9 +11,10 @@ interface MainContract {
     }
 
     interface Presenter {
+        fun attach(view : View)
+        fun detach()
         fun updateMovieList(page : Int)
         fun searchMovie(query : String)
-        fun onDestroy()
     }
 
     interface Model {

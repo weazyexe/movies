@@ -5,22 +5,29 @@ import exe.weazy.movies.arch.MainContract
 import exe.weazy.movies.entity.Movie
 import exe.weazy.movies.model.MainModel
 
-class MainPresenter(private var view: MainContract.View) : MainContract.Presenter, LoadingListener {
+class MainPresenter : MainContract.Presenter, LoadingListener {
 
+    private lateinit var view: MainContract.View
     private val BASE_IMAGE_URL = "https://image.tmdb.org/t/p/w500"
     private var model : MainModel = MainModel(this)
     private var movies : ArrayList<Movie> = ArrayList()
 
+
+    override fun attach(view: MainContract.View) {
+        this.view = view
+    }
+
+    override fun detach() {
+
+    }
+
     override fun updateMovieList(page : Int) {
+        view.showLoading()
         model.loadMovies(page)
     }
 
     override fun searchMovie(query: String) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override fun onDestroy() {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // TODO: implement it
     }
 
 
@@ -36,10 +43,10 @@ class MainPresenter(private var view: MainContract.View) : MainContract.Presente
     }
 
     override fun onFailure(t: Throwable) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        view.showError()
     }
 
     override fun onProgressUpdate(percentage: Int) {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // TODO: implement it
     }
 }

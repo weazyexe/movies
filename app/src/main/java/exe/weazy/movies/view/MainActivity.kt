@@ -1,19 +1,16 @@
 package exe.weazy.movies.view
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import exe.weazy.movies.R
 import exe.weazy.movies.adapter.MoviesAdapter
 import exe.weazy.movies.arch.MainContract
-import exe.weazy.movies.di.ArchModule
-import exe.weazy.movies.di.DaggerComponent
-import exe.weazy.movies.di.NetworkModule
+import exe.weazy.movies.di.App
 import exe.weazy.movies.entity.Movie
 import exe.weazy.movies.presenter.MainPresenter
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.Retrofit
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -21,7 +18,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     @Inject
     lateinit var presenter: MainPresenter
 
-    private lateinit var movies : ArrayList<Movie>
+    private var movies = ArrayList<Movie>()
 
     private lateinit var adapter : MoviesAdapter
 
@@ -34,8 +31,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        injectDependencies()
+        App.getComponent().injectsMainActivity(this)
 
+        presenter.attach(this)
         presenter.updateMovieList(page)
     }
 
@@ -51,28 +49,26 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun showList(movies : ArrayList<Movie>) {
         adapter.setMovies(movies)
+
+        layout_progress_bar.visibility = View.GONE
+        layout_error.visibility = View.GONE
+        recycler_view_movies.visibility = View.VISIBLE
     }
 
     override fun showLoading() {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        layout_progress_bar.visibility = View.VISIBLE
+        layout_error.visibility = View.GONE
+        recycler_view_movies.visibility = View.GONE
     }
 
     override fun showNotFound() {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        // TODO: implement it
     }
 
     override fun showError() {
-        //TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        layout_progress_bar.visibility = View.GONE
+        layout_error.visibility = View.VISIBLE
+        recycler_view_movies.visibility = View.GONE
     }
 
-
-
-    private fun injectDependencies() {
-        val component = DaggerComponent.builder()
-            .archModule(ArchModule(this))
-            .networkModule(NetworkModule())
-            .build()
-
-        component.injectsMainActivity(this)
-    }
 }

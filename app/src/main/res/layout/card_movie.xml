@@ -19,7 +19,8 @@
                 android:id="@+id/image_poster"
                 android:layout_width="120dp"
                 android:layout_height="match_parent"
-                android:layout_alignParentStart="true"/>
+                android:layout_alignParentStart="true"
+                android:scaleType="center"/>
 
         <TextView
                 android:id="@+id/text_title"
@@ -31,12 +32,14 @@
                 android:layout_height="wrap_content"
                 android:layout_toEndOf="@id/image_poster"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"/>
 
         <TextView
                 android:id="@+id/text_overview"
                 tools:text="@tools:sample/lorem/random"
                 android:textSize="14sp"
+                android:maxLines="3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -45,7 +48,7 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginBottom="18dp"
+                android:layout_marginBottom="8dp"
                 android:layout_above="@id/image_calendar"/>
 
         <ImageView

@@ -9,4 +9,5 @@
     <color name="colorObsidianBlack">#0c0c0d</color>
     <color name="colorBlue">#004fff</color>
     <color name="colorWhite">#fff</color>
+    <color name="colorGrey">#b4b4b4</color>
 </resources>

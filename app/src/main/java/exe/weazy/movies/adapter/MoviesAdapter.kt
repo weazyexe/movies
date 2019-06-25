@@ -12,10 +12,13 @@ import exe.weazy.movies.R
 import exe.weazy.movies.Tools
 import exe.weazy.movies.entity.Movie
 
-class MoviesAdapter(private var movies : List<Movie>) : RecyclerView.Adapter<MoviesAdapter.Holder>() {
+class MoviesAdapter(private var movies : List<Movie>, private var onItemClickListener : View.OnClickListener)
+    : RecyclerView.Adapter<MoviesAdapter.Holder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-        return Holder(LayoutInflater.from(parent.context).inflate(R.layout.card_movie, parent, false))
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.card_movie, parent, false)
+        view.setOnClickListener(onItemClickListener)
+        return Holder(view)
     }
 
     override fun getItemCount() = movies.size

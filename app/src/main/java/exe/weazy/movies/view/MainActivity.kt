@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import exe.weazy.movies.R
 import exe.weazy.movies.adapter.MoviesAdapter
 import exe.weazy.movies.arch.MainContract
@@ -18,13 +19,13 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     @Inject
     lateinit var presenter: MainPresenter
 
-    private var movies = ArrayList<Movie>()
-
     private lateinit var adapter : MoviesAdapter
 
     private lateinit var manager : LinearLayoutManager
 
     private var page = 1
+
+    private lateinit var onItemClickListener : View.OnClickListener
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,8 +41,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     override fun onStart() {
         super.onStart()
 
-        initRecyclerView()
         initListeners()
+        initRecyclerView()
     }
 
     override fun showList(movies : ArrayList<Movie>) {
@@ -63,14 +64,24 @@ class MainActivity : AppCompatActivity(), MainContract.View {
     }
 
     override fun showError() {
-        layout_progress_bar.visibility = View.GONE
-        layout_error.visibility = View.VISIBLE
-        recycler_view_movies.visibility = View.GONE
+
+        if (adapter.itemCount == 0) {
+            layout_progress_bar.visibility = View.GONE
+            layout_error.visibility = View.VISIBLE
+            recycler_view_movies.visibility = View.GONE
+        } else {
+            layout_progress_bar.visibility = View.GONE
+            layout_error.visibility = View.GONE
+            recycler_view_movies.visibility = View.VISIBLE
+
+            Snackbar.make(layout_main, R.string.error, Snackbar.LENGTH_LONG).show()
+        }
     }
 
 
     private fun initRecyclerView() {
-        adapter = MoviesAdapter(movies)
+
+        adapter = MoviesAdapter(ArrayList(), onItemClickListener)
         manager = LinearLayoutManager(this)
 
         recycler_view_movies.adapter = adapter
@@ -87,6 +98,11 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         fab_update.setOnClickListener {
             page = 1
             presenter.updateMovieList(page)
+        }
+
+        onItemClickListener = View.OnClickListener {
+            val position = recycler_view_movies.getChildAdapterPosition(it)
+            Snackbar.make(layout_main, presenter.getMovie(position).title, Snackbar.LENGTH_SHORT).show()
         }
     }
 

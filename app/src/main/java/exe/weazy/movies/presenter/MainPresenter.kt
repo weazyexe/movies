@@ -53,4 +53,6 @@ class MainPresenter : MainContract.Presenter, LoadingListener {
     override fun onProgressUpdate(percentage: Int) {
         // TODO: implement it
     }
+
+    fun getMovie(index : Int) = movies[index]
 }

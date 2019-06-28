@@ -29,5 +29,17 @@ class Tools {
                 InputMethodManager.HIDE_NOT_ALWAYS
             )
         }
+
+        fun getCyrillicString(str : String) : String {
+            val lowerCaseString = str.toLowerCase()
+            val result = StringBuilder()
+
+            lowerCaseString.forEach {
+                if (it == 'ё') result.append('е')
+                else result.append(it)
+            }
+
+            return result.toString()
+        }
     }
 }

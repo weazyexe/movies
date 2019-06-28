@@ -53,10 +53,14 @@ class MoviesAdapter(private var context : Context,
             .into(holder.poster)
     }
 
+
+
     fun setMovies(movies : ArrayList<Movie>) {
         this.movies = movies
         notifyDataSetChanged()
     }
+
+
 
     inner class Holder(view : View) : RecyclerView.ViewHolder(view) {
 

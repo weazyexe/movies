@@ -9,7 +9,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -18,12 +17,10 @@ import exe.weazy.movies.Tools
 import exe.weazy.movies.adapter.MoviesAdapter
 import exe.weazy.movies.arch.MainContract
 import exe.weazy.movies.arch.MainViewModel
-import exe.weazy.movies.di.App
 import exe.weazy.movies.entity.Movie
 import exe.weazy.movies.presenter.MainPresenter
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
-import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), MainContract.View {
 
@@ -39,6 +36,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private lateinit var onLikeClickListener : View.OnClickListener
 
+    private lateinit var snackbar : Snackbar
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,8 +51,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             presenter = it
 
             presenter.attach(this, File(filesDir, "likes"))
-            presenter.updateMovieList()
-            showList()
+            presenter.getMovieList(isUpdate = false)
         })
     }
 
@@ -74,10 +72,21 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+
+
+    /**
+     * Обновление списка фильмов в RecyclerView
+     * @param movies - новый список для отображения
+     */
     override fun updateList(movies: ArrayList<Movie>) {
         adapter.setMovies(movies)
     }
 
+
+
+    /**
+     * Отображение layout'а списка фильмов
+     */
     override fun showList() {
         layout_circle_progress_bar.visibility = View.GONE
         layout_horizontal_progress_bar.visibility = View.GONE
@@ -86,6 +95,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         layout_not_found.visibility = View.GONE
     }
 
+    /**
+     * Отображение layout'а круглого progress bar
+     */
     override fun showCircleLoading() {
         layout_circle_progress_bar.visibility = View.VISIBLE
         layout_horizontal_progress_bar.visibility = View.GONE
@@ -94,6 +106,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         layout_not_found.visibility = View.GONE
     }
 
+    /**
+     * Отображение layout'а горизонтального progress bar
+     */
     override fun showHorizontalLoading() {
         recycler_view_movies.visibility = View.VISIBLE
         layout_horizontal_progress_bar.visibility = View.VISIBLE
@@ -102,6 +117,9 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         layout_not_found.visibility = View.GONE
     }
 
+    /**
+     * Отображение layout'а отсудствия результатов поиска
+     */
     override fun showNotFound() {
         text_not_found.text = getString(R.string.not_found, edit_text_search.text.toString())
 
@@ -112,20 +130,32 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         layout_not_found.visibility = View.VISIBLE
     }
 
+    /**
+     * Отображение layout'а с ошибкой
+     */
     override fun showError() {
-        if (adapter.itemCount == 0) {
-            layout_circle_progress_bar.visibility = View.GONE
-            layout_horizontal_progress_bar.visibility = View.GONE
-            layout_error.visibility = View.VISIBLE
-            recycler_view_movies.visibility = View.GONE
-            layout_not_found.visibility = View.GONE
-        } else {
-            showList()
-            Snackbar.make(layout_main, R.string.error, Snackbar.LENGTH_LONG).show()
+        layout_circle_progress_bar.visibility = View.GONE
+        layout_horizontal_progress_bar.visibility = View.GONE
+        layout_error.visibility = View.VISIBLE
+        recycler_view_movies.visibility = View.GONE
+        layout_not_found.visibility = View.GONE
+    }
+
+    /**
+     * Отображение snackbar с ошибкой
+     */
+    override fun showSnackbarError() {
+        if (!::snackbar.isInitialized || !snackbar.isShown) {
+            snackbar = Snackbar.make(layout_main, R.string.error, Snackbar.LENGTH_LONG)
+            snackbar.show()
         }
     }
 
 
+
+    /**
+     * Инициализация RecyclerView и Adapter
+     */
     private fun initRecyclerView() {
         adapter = MoviesAdapter(this, ArrayList(), onItemClickListener, onLikeClickListener)
         manager = LinearLayoutManager(this)
@@ -134,21 +164,33 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         recycler_view_movies.layoutManager = manager
     }
 
+    /**
+     * Инициализация listener'ов
+     */
     private fun initListeners() {
+        initActivityListeners()
+        initAdapterListeners()
+    }
+
+    /**
+     * Инициализация событий кнопок и search bar
+     */
+    private fun initActivityListeners() {
+        // Событие обновления по свайпу
         swipe_refresh_layout_movies.setOnRefreshListener {
-            edit_text_search.setText("", TextView.BufferType.EDITABLE)
-            presenter.updateMovieList()
-            swipe_refresh_layout_movies.isRefreshing = false
+            refresh()
         }
 
+        // Событие обновления по нажатию на FAB
         fab_update.setOnClickListener {
-            presenter.updateMovieList()
+            refresh()
         }
 
+        // Событие изменения search bar
         edit_text_search.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
                 if (p0.isNullOrBlank()) {
-                    presenter.updateMovieList()
+                    presenter.getMovieList()
                 } else {
                     presenter.searchMovie(p0.toString())
                 }
@@ -162,12 +204,19 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
             }
         })
+    }
 
+    /**
+     * Инициализация событий списка фильмов
+     */
+    private fun initAdapterListeners() {
+        // Событие нажатия на фильм в списке
         onItemClickListener = View.OnClickListener {
             val position = recycler_view_movies.getChildAdapterPosition(it)
             Snackbar.make(layout_main, presenter.getMovie(position).title, Snackbar.LENGTH_SHORT).show()
         }
 
+        // Событие нажатия на кнопку "Добавить в избранное"
         onLikeClickListener = View.OnClickListener {
             if (it is ImageView) {
                 val position = recycler_view_movies.getChildAdapterPosition(it.parent.parent as View)
@@ -184,4 +233,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         }
     }
 
+
+
+    /**
+     * Обновить список фильмов
+     */
+    private fun refresh() {
+        edit_text_search.setText("", TextView.BufferType.EDITABLE)
+        swipe_refresh_layout_movies.isRefreshing = false
+        presenter.getMovieList(isUpdate = true)
+    }
 }

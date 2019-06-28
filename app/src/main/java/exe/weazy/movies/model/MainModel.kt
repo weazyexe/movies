@@ -20,6 +20,9 @@ class MainModel(private var presenter: MainPresenter, private var file : File) :
         App.getComponent().injectsMainModel(this)
     }
 
+    /**
+     * Загрузка списка фильмов
+     */
     override fun loadMovies(page : Int, query: String) {
         val service = retrofit.create(RequestService::class.java)
 
@@ -31,17 +34,20 @@ class MainModel(private var presenter: MainPresenter, private var file : File) :
 
         call.enqueue(object : retrofit2.Callback<MovieResponse> {
             override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
-                presenter.onFailure(t)
+                presenter.onMoviesLoadedFailure(t)
             }
 
             override fun onResponse(call: Call<MovieResponse>, response: Response<MovieResponse>) {
                 val movies = response.body()?.movies
-                presenter.onFinished(movies)
+                presenter.onMoviesLoadedFinished(movies)
             }
 
         })
     }
 
+    /**
+     * Запись избранных в internal storage
+     */
     override fun writeLikes(likes : ArrayList<Int>) {
         val likesToWrite = StringBuilder()
 
@@ -52,6 +58,9 @@ class MainModel(private var presenter: MainPresenter, private var file : File) :
         file.writeText(likesToWrite.toString())
     }
 
+    /**
+     * Чтение избранных из internal storage
+     */
     override fun getLikes() : ArrayList<Int> {
 
         return if (file.exists()) {

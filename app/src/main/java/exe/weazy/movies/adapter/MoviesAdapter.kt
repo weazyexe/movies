@@ -1,22 +1,31 @@
 package exe.weazy.movies.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import exe.weazy.movies.R
 import exe.weazy.movies.Tools
 import exe.weazy.movies.entity.Movie
 
-class MoviesAdapter(private var movies : List<Movie>, private var onItemClickListener : View.OnClickListener)
+class MoviesAdapter(private var context : Context,
+                    private var movies : List<Movie>,
+                    private var onItemClickListener : View.OnClickListener,
+                    private var onLikeClickListener : View.OnClickListener)
     : RecyclerView.Adapter<MoviesAdapter.Holder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.card_movie, parent, false)
+
+        val like = view.findViewById<ImageView>(R.id.image_like)
+
+        like.setOnClickListener(onLikeClickListener)
         view.setOnClickListener(onItemClickListener)
         return Holder(view)
     }
@@ -34,11 +43,9 @@ class MoviesAdapter(private var movies : List<Movie>, private var onItemClickLis
         }
 
         if (movie.like) {
-            holder.liked.visibility = View.VISIBLE
-            holder.notLiked.visibility = View.GONE
+            holder.like.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.ic_heart_fill, null))
         } else {
-            holder.liked.visibility = View.GONE
-            holder.notLiked.visibility = View.VISIBLE
+            holder.like.setImageDrawable(ResourcesCompat.getDrawable(context.resources, R.drawable.ic_heart, null))
         }
 
         Glide.with(holder.cardMovie)
@@ -58,8 +65,7 @@ class MoviesAdapter(private var movies : List<Movie>, private var onItemClickLis
         var overview : TextView
         var poster : ImageView
         var date : TextView
-        var liked : ImageView
-        var notLiked : ImageView
+        var like : ImageView
 
         init {
             super.itemView
@@ -69,8 +75,7 @@ class MoviesAdapter(private var movies : List<Movie>, private var onItemClickLis
             overview = itemView.findViewById(R.id.text_overview)
             poster = itemView.findViewById(R.id.image_poster)
             date = itemView.findViewById(R.id.text_date)
-            liked = itemView.findViewById(R.id.image_liked)
-            notLiked = itemView.findViewById(R.id.image_not_liked)
+            like = itemView.findViewById(R.id.image_like)
         }
     }
 }

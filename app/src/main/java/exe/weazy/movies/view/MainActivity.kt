@@ -3,19 +3,22 @@ package exe.weazy.movies.view
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import exe.weazy.movies.R
+import exe.weazy.movies.Tools
 import exe.weazy.movies.adapter.MoviesAdapter
 import exe.weazy.movies.arch.MainContract
 import exe.weazy.movies.di.App
 import exe.weazy.movies.entity.Movie
 import exe.weazy.movies.presenter.MainPresenter
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), MainContract.View {
@@ -29,6 +32,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private lateinit var onItemClickListener : View.OnClickListener
 
+    private lateinit var onLikeClickListener : View.OnClickListener
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +42,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         App.getComponent().injectsMainActivity(this)
 
-        presenter.attach(this)
+        presenter.attach(this, File(filesDir, "likes"))
         presenter.updateMovieList()
     }
 
@@ -46,6 +51,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         initListeners()
         initRecyclerView()
+    }
+
+    override fun onBackPressed() {
+        if (!edit_text_search.text.isNullOrBlank()) {
+            edit_text_search.setText("", TextView.BufferType.EDITABLE)
+            Tools.hideKeyboard(layout_main, this)
+            edit_text_search.clearFocus()
+        } else {
+            super.onBackPressed()
+        }
     }
 
     override fun updateList(movies: ArrayList<Movie>) {
@@ -101,7 +116,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
 
     private fun initRecyclerView() {
-        adapter = MoviesAdapter(ArrayList(), onItemClickListener)
+        adapter = MoviesAdapter(this, ArrayList(), onItemClickListener, onLikeClickListener)
         manager = LinearLayoutManager(this)
 
         recycler_view_movies.adapter = adapter
@@ -129,17 +144,32 @@ class MainActivity : AppCompatActivity(), MainContract.View {
             }
 
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                Log.d("!!!DA", p0.toString())
+
             }
 
             override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                Log.d("!!!DA", p0.toString())
+
             }
         })
 
         onItemClickListener = View.OnClickListener {
             val position = recycler_view_movies.getChildAdapterPosition(it)
             Snackbar.make(layout_main, presenter.getMovie(position).title, Snackbar.LENGTH_SHORT).show()
+        }
+
+        onLikeClickListener = View.OnClickListener {
+            if (it is ImageView) {
+                val position = recycler_view_movies.getChildAdapterPosition(it.parent.parent as View)
+                val movie = presenter.getMovie(position)
+
+                if (movie.like) {
+                    it.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_heart, null))
+                } else {
+                    it.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.ic_heart_fill, null))
+                }
+
+                presenter.likeMovie(movie.id)
+            }
         }
     }
 

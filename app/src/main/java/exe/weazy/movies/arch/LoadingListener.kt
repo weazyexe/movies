@@ -5,5 +5,4 @@ import exe.weazy.movies.entity.Movie
 interface LoadingListener {
     fun onFinished(movies : ArrayList<Movie>?)
     fun onFailure(t : Throwable)
-    fun onProgressUpdate(percentage : Int)
 }

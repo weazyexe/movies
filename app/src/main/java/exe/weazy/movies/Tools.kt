@@ -1,5 +1,8 @@
 package exe.weazy.movies
 
+import android.content.Context
+import android.view.View
+import android.view.inputmethod.InputMethodManager
 import java.text.DateFormatSymbols
 
 class Tools {
@@ -17,6 +20,14 @@ class Tools {
             return day.toInt().toString() +
                     " " + DateFormatSymbols().months[month.toInt() - 1] +
                     " " + year.toInt().toString()
+        }
+
+        fun hideKeyboard(view: View?, context: Context?) {
+            val inputManager = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            inputManager.hideSoftInputFromWindow(
+                view?.windowToken,
+                InputMethodManager.HIDE_NOT_ALWAYS
+            )
         }
     }
 }

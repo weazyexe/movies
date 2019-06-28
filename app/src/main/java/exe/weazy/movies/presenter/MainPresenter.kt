@@ -42,7 +42,11 @@ class MainPresenter : MainContract.Presenter, MainContract.LoadingListener {
             // Если мы загружаем данные впервые или если хотим их обновить
             !isUpdate && allMovies.isEmpty() || isUpdate -> {
                 this.isUpdate = isUpdate
+
+                allMovies = ArrayList()
+
                 view.showCircleLoading()
+
                 model.loadMovies(page)
                 likes = model.getLikes()
             }

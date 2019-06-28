@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private lateinit var snackbar : Snackbar
 
+    private var isUpdate = false
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -189,10 +191,12 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         // Событие изменения search bar
         edit_text_search.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {
-                if (p0.isNullOrBlank()) {
-                    presenter.getMovieList()
-                } else {
-                    presenter.searchMovie(p0.toString())
+                if (!isUpdate) {
+                    if (p0.isNullOrBlank()) {
+                        presenter.getMovieList()
+                    } else {
+                        presenter.searchMovie(p0.toString())
+                    }
                 }
             }
 
@@ -239,8 +243,10 @@ class MainActivity : AppCompatActivity(), MainContract.View {
      * Обновить список фильмов
      */
     private fun refresh() {
+        isUpdate = true
         edit_text_search.setText("", TextView.BufferType.EDITABLE)
         swipe_refresh_layout_movies.isRefreshing = false
         presenter.getMovieList(isUpdate = true)
+        isUpdate = false
     }
 }

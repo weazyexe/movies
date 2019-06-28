@@ -1,7 +1,11 @@
 package exe.weazy.movies.view
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
@@ -23,9 +27,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private lateinit var manager : LinearLayoutManager
 
-    private var page = 1
-
     private lateinit var onItemClickListener : View.OnClickListener
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,7 +38,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         App.getComponent().injectsMainActivity(this)
 
         presenter.attach(this)
-        presenter.updateMovieList(page)
+        presenter.updateMovieList()
     }
 
     override fun onStart() {
@@ -45,42 +48,59 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         initRecyclerView()
     }
 
-    override fun showList(movies : ArrayList<Movie>) {
+    override fun updateList(movies: ArrayList<Movie>) {
         adapter.setMovies(movies)
-
-        layout_progress_bar.visibility = View.GONE
-        layout_error.visibility = View.GONE
-        recycler_view_movies.visibility = View.VISIBLE
     }
 
-    override fun showLoading() {
-        layout_progress_bar.visibility = View.VISIBLE
+    override fun showList() {
+        layout_circle_progress_bar.visibility = View.GONE
+        layout_horizontal_progress_bar.visibility = View.GONE
+        layout_error.visibility = View.GONE
+        recycler_view_movies.visibility = View.VISIBLE
+        layout_not_found.visibility = View.GONE
+    }
+
+    override fun showCircleLoading() {
+        layout_circle_progress_bar.visibility = View.VISIBLE
+        layout_horizontal_progress_bar.visibility = View.GONE
         layout_error.visibility = View.GONE
         recycler_view_movies.visibility = View.GONE
+        layout_not_found.visibility = View.GONE
+    }
+
+    override fun showHorizontalLoading() {
+        recycler_view_movies.visibility = View.VISIBLE
+        layout_horizontal_progress_bar.visibility = View.VISIBLE
+        layout_circle_progress_bar.visibility = View.GONE
+        layout_error.visibility = View.GONE
+        layout_not_found.visibility = View.GONE
     }
 
     override fun showNotFound() {
-        // TODO: implement it
+        text_not_found.text = getString(R.string.not_found, edit_text_search.text.toString())
+
+        recycler_view_movies.visibility = View.GONE
+        layout_horizontal_progress_bar.visibility = View.GONE
+        layout_circle_progress_bar.visibility = View.GONE
+        layout_error.visibility = View.GONE
+        layout_not_found.visibility = View.VISIBLE
     }
 
     override fun showError() {
-
         if (adapter.itemCount == 0) {
-            layout_progress_bar.visibility = View.GONE
+            layout_circle_progress_bar.visibility = View.GONE
+            layout_horizontal_progress_bar.visibility = View.GONE
             layout_error.visibility = View.VISIBLE
             recycler_view_movies.visibility = View.GONE
+            layout_not_found.visibility = View.GONE
         } else {
-            layout_progress_bar.visibility = View.GONE
-            layout_error.visibility = View.GONE
-            recycler_view_movies.visibility = View.VISIBLE
-
+            showList()
             Snackbar.make(layout_main, R.string.error, Snackbar.LENGTH_LONG).show()
         }
     }
 
 
     private fun initRecyclerView() {
-
         adapter = MoviesAdapter(ArrayList(), onItemClickListener)
         manager = LinearLayoutManager(this)
 
@@ -90,15 +110,32 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     private fun initListeners() {
         swipe_refresh_layout_movies.setOnRefreshListener {
-            page = 1
-            presenter.updateMovieList(page)
+            edit_text_search.setText("", TextView.BufferType.EDITABLE)
+            presenter.updateMovieList()
             swipe_refresh_layout_movies.isRefreshing = false
         }
 
         fab_update.setOnClickListener {
-            page = 1
-            presenter.updateMovieList(page)
+            presenter.updateMovieList()
         }
+
+        edit_text_search.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {
+                if (p0.isNullOrBlank()) {
+                    presenter.updateMovieList()
+                } else {
+                    presenter.searchMovie(p0.toString())
+                }
+            }
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                Log.d("!!!DA", p0.toString())
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                Log.d("!!!DA", p0.toString())
+            }
+        })
 
         onItemClickListener = View.OnClickListener {
             val position = recycler_view_movies.getChildAdapterPosition(it)

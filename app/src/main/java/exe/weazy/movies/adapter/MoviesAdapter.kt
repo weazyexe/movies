@@ -28,7 +28,10 @@ class MoviesAdapter(private var movies : List<Movie>, private var onItemClickLis
 
         holder.title.text = movie.title
         holder.overview.text = movie.overview
-        holder.date.text = Tools.convertDate(movie.releaseDate)
+
+        if (!movie.releaseDate.isBlank()) {
+            holder.date.text = Tools.convertDate(movie.releaseDate)
+        }
 
         if (movie.like) {
             holder.liked.visibility = View.VISIBLE

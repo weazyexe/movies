@@ -2,4 +2,5 @@
     <string name="app_name">movies</string>
     <string name="search_by_title">Поиск по названию фильма</string>
     <string name="error">Нам не удалось обработать ваш запрос. Попробуйте еще раз</string>
+    <string name="not_found">По запросу \"%1$s\" ничего не найдено</string>
 </resources>

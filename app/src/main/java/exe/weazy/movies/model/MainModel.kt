@@ -21,7 +21,13 @@ class MainModel(private var presenter: MainPresenter) : MainContract.Model {
 
     override fun loadMovies(page : Int, query: String) {
         val service = retrofit.create(RequestService::class.java)
-        val call = service.getMovies(1)
+
+        val call = if (query.isBlank()) {
+            service.getMovies(1)
+        } else {
+            service.getMoviesByQuery(query)
+        }
+
         call.enqueue(object : retrofit2.Callback<MovieResponse> {
             override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
                 presenter.onFailure(t)

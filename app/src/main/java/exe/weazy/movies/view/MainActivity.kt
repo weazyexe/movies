@@ -8,12 +8,16 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import exe.weazy.movies.R
 import exe.weazy.movies.Tools
 import exe.weazy.movies.adapter.MoviesAdapter
 import exe.weazy.movies.arch.MainContract
+import exe.weazy.movies.arch.MainViewModel
 import exe.weazy.movies.di.App
 import exe.weazy.movies.entity.Movie
 import exe.weazy.movies.presenter.MainPresenter
@@ -23,8 +27,9 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), MainContract.View {
 
-    @Inject
-    lateinit var presenter: MainPresenter
+    private lateinit var viewModel : MainViewModel
+
+    private lateinit var presenter: MainPresenter
 
     private lateinit var adapter : MoviesAdapter
 
@@ -40,10 +45,16 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        App.getComponent().injectsMainActivity(this)
+        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
 
-        presenter.attach(this, File(filesDir, "likes"))
-        presenter.updateMovieList()
+        val presenterLiveData = viewModel.getPresenter()
+        presenterLiveData.observe(this, Observer {
+            presenter = it
+
+            presenter.attach(this, File(filesDir, "likes"))
+            presenter.updateMovieList()
+            showList()
+        })
     }
 
     override fun onStart() {

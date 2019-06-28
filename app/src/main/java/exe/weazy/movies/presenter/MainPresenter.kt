@@ -31,7 +31,7 @@ class MainPresenter : MainContract.Presenter, LoadingListener {
     }
 
     override fun updateMovieList(page : Int) {
-        if (isSearch) {
+        if (isSearch || allMovies.isNotEmpty()) {
             isSearch = false
             currentMovies = allMovies
             view.updateList(allMovies)

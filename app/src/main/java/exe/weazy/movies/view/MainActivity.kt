@@ -159,11 +159,15 @@ class MainActivity : AppCompatActivity(), MainContract.View {
      * Инициализация RecyclerView и Adapter
      */
     private fun initRecyclerView() {
-        adapter = MoviesAdapter(this, ArrayList(), onItemClickListener, onLikeClickListener)
-        manager = LinearLayoutManager(this)
+        if (!::adapter.isInitialized) {
+            adapter = MoviesAdapter(this, ArrayList(), onItemClickListener, onLikeClickListener)
+            manager = LinearLayoutManager(this)
 
-        recycler_view_movies.adapter = adapter
-        recycler_view_movies.layoutManager = manager
+            recycler_view_movies.adapter = adapter
+            recycler_view_movies.layoutManager = manager
+        } else {
+            presenter.getMovieList(isUpdate = false)
+        }
     }
 
     /**
